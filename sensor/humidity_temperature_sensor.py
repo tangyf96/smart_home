@@ -132,7 +132,11 @@ class HumidityMap():
         return (False, 0, 0)
 
     def GetDataId(self):
-        cur_data_id = int(input("Please input your data id:    "))
+        cur_input = input("Please input your data id:    ")
+        try:
+            cur_data_id = int(cur_input)
+        except:
+            return False, 0
         status = False
         if cur_data_id > self.max_data_id_:
             status = False
@@ -166,6 +170,21 @@ class HumidityMap():
                     else:
                         continue
                     time.sleep(2)
+                if len(humidity_data) % 10 == 0 and len(humidity_data) != 0:
+                    data_dict = {"humidity":humidity_data, "temperature":temperature_data}
+                    # save data
+                    save_time_str = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
+                    save_path = folder_path + "/humid_temp_" + save_time_str + ".pkl"
+                    with open(save_path, "wb") as f:
+                        pickle.dump(data_dict, f)
+                
+                    txt_data_path = folder_path + "/humid_map_data_" + save_time_str + ".txt"
+                    with open(txt_data_path, 'w') as f:
+                        f.write("id\ttimestamp\thumidity\ttemperature\n")
+                        for i in range(len(humidity_data)):
+                            assert(humidity_data[i][2] == temperature_data[i][2])
+                            f.write("{}\t{}\t{}\t{}\n".format(humidity_data[i][2], humidity_data[i][1], humidity_data[i][0], temperature_data[i][0]))
+
             except KeyboardInterrupt:
                 print("Kill by terminal, data len: {}".format(len(humidity_data)))
                 data_dict = {"humidity":humidity_data, "temperature":temperature_data}
@@ -188,12 +207,12 @@ class HumidityMap():
 
 
 if __name__ == "__main__":
-    # humidity_sensor_test()
+    humidity_sensor_test()
     # button_test()
 
-    button_io = 17
-    sensor_io = 18
-    path = "/home/pi/smart_home/data"
-    test = HumidityMap(button_io, sensor_io, map_path="/home/pi/smart_home/data/home_layout/sample_points.pkl", area_num=1)
-    test.Initialize()
-    test.GetData(path)
+    # button_io = 17
+    # sensor_io = 18
+    # path = "/home/pi/smart_home/data"
+    # test = HumidityMap(button_io, sensor_io, map_path="/home/pi/smart_home/data/home_layout/sample_points.pkl", area_num=1)
+    # test.Initialize()
+    # test.GetData(path)
